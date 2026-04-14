@@ -4,7 +4,7 @@ info:
   version: 1.0.0
 servers:
   - url: http://localhost:3000
-    description: Local development servers
+    description: Local development server
 tags:
   - name: Tasks
     description: Task-related endpoints
@@ -16,6 +16,16 @@ paths:
       summary: List all tasks
       tags:
         - Tasks
+      parameters:
+        - name: completed
+          in: query
+          required: false
+          description: Filter tasks by completion status
+          schema:
+            type: string
+            enum:
+              - 'true'
+              - 'false'
       responses:
         '200':
           description: OK
@@ -25,6 +35,20 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Task'
+        '400':
+          description: Bad request due to invalid query parameter
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+                example:
+                  errors:
+                    - 'completed must be true or false'
     post:
       summary: Create a new task
       tags:
@@ -34,7 +58,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Task'
+              $ref: '#/components/schemas/TaskInput'
       responses:
         '201':
           description: Task created successfully
@@ -49,9 +73,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  error:
-                    type: string
-                  details:
+                  errors:
                     type: array
                     items:
                       type: string
@@ -61,7 +83,7 @@ paths:
   /health:
     get:
       summary: Health Check
-      description: Returns the current status of the API. Used by Render to verify that the service is running.
+      description: Returns the current status of the API.
       tags:
         - Monitoring
       responses:
@@ -84,6 +106,17 @@ components:
           readOnly: true
           type: integer
           example: 1
+        title:
+          type: string
+          example: Buy groceries
+        completed:
+          type: boolean
+          example: false
+    TaskInput:
+      type: object
+      required:
+        - title
+      properties:
         title:
           type: string
           example: Buy groceries
